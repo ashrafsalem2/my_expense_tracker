@@ -125,6 +125,7 @@ class _NewExpenseState extends State<NewExpense> {
                       _dateTime == null
                           ? "No Date Selected"
                           : formater.format(_dateTime!),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     SizedBox(width: 5),
                     IconButton(
@@ -145,7 +146,16 @@ class _NewExpenseState extends State<NewExpense> {
                     .map(
                       (category) => DropdownMenuItem(
                         value: category,
-                        child: Text(category.name.toUpperCase()),
+                        child: Text(
+                          category.name.toUpperCase(),
+                          style: TextStyle(
+                            color:
+                                MediaQuery.of(context).platformBrightness ==
+                                    Brightness.dark
+                                ? Color.fromARGB(255, 5, 99, 125)
+                                : Color.fromARGB(255, 96, 59, 181),
+                          ),
+                        ),
                       ),
                     )
                     .toList(),

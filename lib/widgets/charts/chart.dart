@@ -32,6 +32,15 @@ class Chart extends StatelessWidget {
     return maxTotalExpense;
   }
 
+  double get totalExpensesHere {
+    double total = 0;
+    for (final bucket in buckets) {
+      total += bucket.totalExpenses;
+    }
+
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode =
@@ -40,7 +49,7 @@ class Chart extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       width: double.infinity,
-      height: 180,
+      height: 220,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         gradient: LinearGradient(
@@ -54,6 +63,20 @@ class Chart extends StatelessWidget {
       ),
       child: Column(
         children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    'Total Day Expenses : ${totalExpensesHere > 0 ? totalExpensesHere : 0.0}',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+              ),
+            ),
+          ),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,

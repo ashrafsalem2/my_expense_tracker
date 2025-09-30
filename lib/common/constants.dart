@@ -10,6 +10,7 @@ final kDarkColorSchema = ColorScheme.fromSeed(
 class Constants {
   static ThemeData mainTheme = ThemeData().copyWith(
     colorScheme: kColorSchema,
+    canvasColor: Colors.white,
     appBarTheme: AppBarTheme().copyWith(
       backgroundColor: kColorSchema.onPrimaryContainer,
       foregroundColor: kColorSchema.primaryContainer,
@@ -36,6 +37,8 @@ class Constants {
   );
   static ThemeData mainDarkTheme = ThemeData.dark().copyWith(
     colorScheme: kDarkColorSchema,
+
+    canvasColor: Color.fromARGB(255, 5, 99, 125),
     appBarTheme: AppBarTheme().copyWith(
       backgroundColor: kDarkColorSchema.onPrimaryContainer,
       foregroundColor: kDarkColorSchema.primaryContainer,
@@ -53,7 +56,12 @@ class Constants {
       titleLarge: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 16,
-        color: kDarkColorSchema.onSecondaryContainer,
+        color: Color.fromARGB(255, 5, 99, 125),
+      ),
+      bodyLarge: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 14,
+        color: Color.fromARGB(255, 5, 99, 125),
       ),
     ),
 

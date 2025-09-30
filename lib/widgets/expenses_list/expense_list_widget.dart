@@ -22,7 +22,7 @@ class ExpenseListWidget extends StatelessWidget {
           margin: EdgeInsets.symmetric(horizontal: 16),
           child: Center(
             child: Text(
-              'Expense will be To Delet',
+              'Expense will be To Delete',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
