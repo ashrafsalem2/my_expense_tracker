@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/utils/enums/category.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/cupertino.dart';
 
 final formater = DateFormat.yMMMd();
 
@@ -19,12 +22,26 @@ class _NewExpenseState extends State<NewExpense> {
   DateTime? _dateTime;
   Category initCat = Category.coffe;
 
-  void _submittedForm() {
-    double? amount = double.tryParse(_amountController.text);
-    bool amountIsFalse = amount == null || amount <= 0;
-    if (_titleController.text.trim().isEmpty ||
-        amountIsFalse ||
-        _dateTime == null) {
+  void _showDialog() {
+    if (Platform.isIOS) {
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text('Invalid Data'),
+            content: Text('Please Entre Valid Data To Save'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -40,6 +57,16 @@ class _NewExpenseState extends State<NewExpense> {
           ],
         ),
       );
+    }
+  }
+
+  void _submittedForm() {
+    double? amount = double.tryParse(_amountController.text);
+    bool amountIsFalse = amount == null || amount <= 0;
+    if (_titleController.text.trim().isEmpty ||
+        amountIsFalse ||
+        _dateTime == null) {
+      _showDialog();
       return;
     }
 
@@ -79,111 +106,233 @@ class _NewExpenseState extends State<NewExpense> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 48, 16, 16),
-      child: Column(
-        children: [
-          Text(
-            'Add New Expense',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+    final keyboardspace = MediaQuery.of(context).viewInsets.bottom;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
 
-          SizedBox(height: 10),
-          TextField(
-            maxLength: 50,
-            controller: _titleController,
-            decoration: InputDecoration(
-              label: FittedBox(child: Text('Title')),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+        return SizedBox(
+          height: double.infinity,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16.0, 16, 16, keyboardspace + 16),
+              child: Column(
+                children: [
+                  Text(
+                    'Add New Expense',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+
+                  SizedBox(height: 10),
+                  if (width > 600)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            maxLength: 50,
+                            controller: _titleController,
+                            decoration: InputDecoration(
+                              label: FittedBox(child: Text('Title')),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: _amountController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              prefixText: '\$ ',
+                              label: Text('Amount of Money'),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    TextField(
+                      maxLength: 50,
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        label: FittedBox(child: Text('Title')),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: 10),
+                  if (width > 600)
+                    Row(
+                      children: [
+                        DropdownButton(
+                          value: initCat,
+                          items: Category.values
+                              .map(
+                                (category) => DropdownMenuItem(
+                                  value: category,
+                                  child: Text(
+                                    category.name.toUpperCase(),
+                                    style: TextStyle(
+                                      color:
+                                          MediaQuery.of(
+                                                context,
+                                              ).platformBrightness ==
+                                              Brightness.dark
+                                          ? Color.fromARGB(255, 5, 99, 125)
+                                          : Color.fromARGB(255, 96, 59, 181),
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (Category? value) {
+                            if (value == null) {
+                              return;
+                            }
+                            setState(() {
+                              initCat = value;
+                            });
+                          },
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                _dateTime == null
+                                    ? "No Date Selected"
+                                    : formater.format(_dateTime!),
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              SizedBox(width: 5),
+                              IconButton(
+                                onPressed: _showDateTimePicker,
+                                icon: Icon(Icons.calendar_month),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _amountController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              prefixText: '\$ ',
+                              label: Text('Amount of Money'),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 2),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                _dateTime == null
+                                    ? "No Date Selected"
+                                    : formater.format(_dateTime!),
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              SizedBox(width: 5),
+                              IconButton(
+                                onPressed: _showDateTimePicker,
+                                icon: Icon(Icons.calendar_month),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  SizedBox(height: 20),
+                  if (width > 600)
+                    Row(
+                      children: [
+                        Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('Cancel'),
+                        ),
+                        SizedBox(width: 5),
+                        ElevatedButton(
+                          onPressed: _submittedForm,
+                          child: Text("Save Expense"),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        DropdownButton(
+                          value: initCat,
+                          items: Category.values
+                              .map(
+                                (category) => DropdownMenuItem(
+                                  value: category,
+                                  child: Text(
+                                    category.name.toUpperCase(),
+                                    style: TextStyle(
+                                      color:
+                                          MediaQuery.of(
+                                                context,
+                                              ).platformBrightness ==
+                                              Brightness.dark
+                                          ? Color.fromARGB(255, 5, 99, 125)
+                                          : Color.fromARGB(255, 96, 59, 181),
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (Category? value) {
+                            if (value == null) {
+                              return;
+                            }
+                            setState(() {
+                              initCat = value;
+                            });
+                          },
+                        ),
+                        Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('Cancel'),
+                        ),
+                        SizedBox(width: 5),
+                        ElevatedButton(
+                          onPressed: _submittedForm,
+                          child: Text("Save Expense"),
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ),
           ),
-          SizedBox(height: 5),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _amountController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    prefixText: '\$ ',
-                    label: Text('Amount of Money'),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 2),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      _dateTime == null
-                          ? "No Date Selected"
-                          : formater.format(_dateTime!),
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    SizedBox(width: 5),
-                    IconButton(
-                      onPressed: _showDateTimePicker,
-                      icon: Icon(Icons.calendar_month),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10),
-          Row(
-            children: [
-              DropdownButton(
-                value: initCat,
-                items: Category.values
-                    .map(
-                      (category) => DropdownMenuItem(
-                        value: category,
-                        child: Text(
-                          category.name.toUpperCase(),
-                          style: TextStyle(
-                            color:
-                                MediaQuery.of(context).platformBrightness ==
-                                    Brightness.dark
-                                ? Color.fromARGB(255, 5, 99, 125)
-                                : Color.fromARGB(255, 96, 59, 181),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (Category? value) {
-                  if (value == null) {
-                    return;
-                  }
-                  setState(() {
-                    initCat = value;
-                  });
-                },
-              ),
-              Spacer(),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('Cancel'),
-              ),
-              SizedBox(width: 5),
-              ElevatedButton(
-                onPressed: _submittedForm,
-                child: Text("Save Expense"),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

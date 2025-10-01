@@ -32,6 +32,7 @@ class _ExpenseState extends State<Expenses> {
   // to display overlay Model
   void _showOverlayModelBottomSheet() {
     showModalBottomSheet(
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).bottomAppBarTheme.color,
       context: context,
@@ -70,6 +71,9 @@ class _ExpenseState extends State<Expenses> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Expense Tracker'),
@@ -93,17 +97,33 @@ class _ExpenseState extends State<Expenses> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Chart(expenses: ExpList),
-          Expanded(
-            child: ExpenseListWidget(
-              expList: ExpList,
-              onRemoveExpense: _removeExpense,
+      body: width < 600
+          ? SafeArea(
+              child: Column(
+                children: [
+                  Chart(expenses: ExpList),
+                  Expanded(
+                    child: ExpenseListWidget(
+                      expList: ExpList,
+                      onRemoveExpense: _removeExpense,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : SafeArea(
+              child: Row(
+                children: [
+                  Expanded(child: Chart(expenses: ExpList)),
+                  Expanded(
+                    child: ExpenseListWidget(
+                      expList: ExpList,
+                      onRemoveExpense: _removeExpense,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
     );
   }
 }
